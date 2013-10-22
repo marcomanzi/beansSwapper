@@ -92,9 +92,6 @@
   (is (= (evaluate-swap-mapping sourcePropertyMap) {:superObject sourcePropertyMap
                                                     :subSources-subTargets subSourceMap})))
 
-{"subObject.name" "subTargetObject.targetName"
- "subObject.property" "subTargetObject.property"
- "subObject.property2" "subTargetObject.property2@"}
 ;(map #(split % #"[.]") (vals m))
 
 ;test.getClass().getMethod("getSubTargets").toGenericString()
