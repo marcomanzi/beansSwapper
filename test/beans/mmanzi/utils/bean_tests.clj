@@ -84,6 +84,8 @@
    :subPropertyn All the map for subProperty objects of object"
   [m]
   {:superObject m})
+;=> (map #(into {} %) (partition-by #(.contains (first %) ".") mappingFull))
+
 
 (deftest evaluate-swap-mapping-tests
   (is (= (evaluate-swap-mapping sourcePropertyMap) {:superObject sourcePropertyMap}))
