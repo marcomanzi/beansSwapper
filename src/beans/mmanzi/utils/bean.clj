@@ -30,14 +30,6 @@
   ((keyword prop) (bean o)))
 (def set-f (partial acces-field set-name-for))
 
-(defn get-f-type
-  "Return the type of the getter for the object :o and the function name f"
-  [o f]
-  (let [o-class (.getClass o)
-        o-methods (into [] (.getMethods o-class))
-        o-method-finded (filter #(= (.getName %) (get-name-for f)) o-methods)]
-    (.getReturnType (first o-method-finded))))
-
 (defn copy-field!
   "Copy the source-field (s-f) from source (s) to target-field (t-f) of target (t)"
   [s s-f t t-f]
