@@ -22,12 +22,11 @@
 (def ^:private source0 (create-source "testName" "testSurname"))
 (def ^:private sourcePropertyMap {"sourceName"           "targetName" 
                                   "sourceSurname"        "targetSurname"})
+(def ^:private subSourceWithIdMap {"subSources.subName"   "subTargets.subTargetName"})
 (def ^:private subSourceMap {"subName"   "subTargetName"})
 
 (def ^:private mappingFull 
-  (merge sourcePropertyMap
-         (zipmap (map #(str "subSources." %) (keys subSourceMap))
-                 (map #(str "subTargets." %) (vals subSourceMap)))))
+  (merge sourcePropertyMap subSourceWithIdMap))
 
 
 (deftest copy-properties-in-map!-tests
@@ -76,6 +75,64 @@
   (is (= (let [s source0]
            (get-f-list-type-str s "subSources")) "test.objects.SubSource")))
 
+(defn partition-map-in-maps-by
+  "Partition the elements of maps using the predicate"
+  [m f]
+  (map #(into {} %) (partition-by f m)))
+  
+
+(deftest partition-map-in-maps-by-tests
+  (is (= (partition-map-in-maps-by {"test" "test" "withPoint.test" "withPoint.test"} #(.contains (first %) ".")) 
+         [{"test" "test"}{"withPoint.test" "withPoint.test"}])))
+
+(def first-map-key-str (comp first first))
+(def second-map-key-str (comp second first))
+
+(defn first-point-index
+  [s]
+  (.indexOf s "."))
+  
+
+(defn sub-obj-property-name
+  "Evalutae the sub object property name for source or target depending on f"
+  [m f]
+  (let [key-str (f m)
+        point-index (first-point-index key-str)]
+    (if (> point-index 0)
+      (.substring key-str 0 point-index)
+      nil)))
+
+(defn keyword-for-sub-object
+  "Evaluate the keyword for the map with subObject properties"
+  [subObj-m]
+  (let [source-property-name (sub-obj-property-name subObj-m first-map-key-str)
+        target-property-name (sub-obj-property-name subObj-m second-map-key-str)]
+    (if source-property-name
+      (keyword (str source-property-name "-" target-property-name))
+      :superObject)))
+
+(deftest keyword-for-sub-object-tests
+  (is (= (keyword-for-sub-object {"test" "test" }) :superObject))
+  (is (= (keyword-for-sub-object {"withPoint.test" "withPoint.test" }) :withPoint-withPoint)))
+
+(defn s-after-first-point
+  "Return the string after the . if a . is in the string
+(ex: 'sub.test'=>'test' 'test'=>'test')"
+  [s]
+  (if (> (first-point-index s) 0)
+    (.substring s (inc (first-point-index s)))
+    s))
+
+(defn remove-sub-obj-id
+  "Remove the first sub object id from elements in map 
+(ex: {'sub.name'} => {'name'} {'sub.name.sub'} => {'name.sub'})"
+  [m]
+  (reduce #(assoc %1 (s-after-first-point (first %2)) (s-after-first-point (second %2))) {} (vec m)))
+
+(deftest remove-sub-obj-id-tests
+  (is (= (remove-sub-obj-id {"test" "test" "sub.test1" "sub2.test"}) 
+         {"test" "test" "test1" "test"})))
+
 (defn evaluate-swap-mapping
   "Create a map with 
    :superObject The properties mapping for the object
@@ -83,16 +140,11 @@
     ....
    :subPropertyn All the map for subProperty objects of object"
   [m]
-  {:superObject m})
-;=> (map #(into {} %) (partition-by #(.contains (first %) ".") mappingFull))
-
+  (let [maps-partitioned (partition-map-in-maps-by m  #(.contains (first %) "."))]
+    (reduce #(assoc %1 (keyword-for-sub-object %2) 
+                    (remove-sub-obj-id %2)) {} maps-partitioned)))
 
 (deftest evaluate-swap-mapping-tests
   (is (= (evaluate-swap-mapping sourcePropertyMap) {:superObject sourcePropertyMap}))
-  (is (= (evaluate-swap-mapping sourcePropertyMap) {:superObject sourcePropertyMap
-                                                    :subSources-subTargets subSourceMap})))
-
-;(map #(split % #"[.]") (vals m))
-
-;test.getClass().getMethod("getSubTargets").toGenericString()
-;(partition-by #(> (.indexOf (str (first %)) ".") 0) (vec {"a" 1 "b" 2 "c.d" 3 "c.d.e" 4}))
+  (is (= (evaluate-swap-mapping mappingFull) {:superObject sourcePropertyMap
+                                              :subSources-subTargets subSourceMap})))
