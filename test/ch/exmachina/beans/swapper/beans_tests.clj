@@ -1,6 +1,6 @@
-(ns beans.mmanzi.utils.bean_tests
+(ns ch.exmachina.beans.swapper.beans-tests
   (use [clojure.test]
-       [beans.mmanzi.utils.bean])
+       [ch.exmachina.beans.swapper.beans])
   (require [clojure.string :as str]))
 
 (defn- create-sub-source
@@ -31,19 +31,19 @@
 
 (deftest copy-properties-in-map!-tests
   (is (= (let [t create-target
-               t (copy-field-in-map! sourcePropertyMap source0 t)]
+               t (copyFieldsWithMapping sourcePropertyMap source0 t)]
            (get-f t "targetName")) "testName")))
 
 (deftest copy-source-sub-object!-tests
   (is (= (let [t create-sub-target
-               t (copy-field-in-map! subSourceMap ((get-f source0 "subSources") 0) t)]
+               t (copyFieldsWithMapping subSourceMap ((get-f source0 "subSources") 0) t)]
            (get-f t "subTargetName")) "sub1")))
 
 (deftest full-copy-source!-tests
   (is (= (let [t create-target
-               _ (copy-field-in-map! sourcePropertyMap source0 t)
+               _ (copyFieldsWithMapping sourcePropertyMap source0 t)
                _ (set-f t "subTargets" (map #(let [st (create "test.objecs.SubTarget")]
-                         (copy-field-in-map! subSourceMap % st)) (get-f source0 "subSources")))]
+                         (copyFieldsWithMapping subSourceMap % st)) (get-f source0 "subSources")))]
            (get-f t "subTargets") 1)) "sub2"))
 
 (defn get-method-by-name
