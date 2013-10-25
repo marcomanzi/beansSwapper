@@ -6,6 +6,8 @@ public class Source {
 	private String sourceName;
 	private String sourceSurname;
 	private List<SubSource> subSources;
+	
+	private ListContainer subListContainer;
 
 	public String getSourceName() {
 		return sourceName;
@@ -29,6 +31,14 @@ public class Source {
 
 	public void setSubSources(List<SubSource> subSources) {
 		this.subSources = subSources;
+	}
+
+	public ListContainer getSubListContainer() {
+		return subListContainer;
+	}
+
+	public void setSubListContainer(ListContainer subListContainer) {
+		this.subListContainer = subListContainer;
 	}
 	
 }

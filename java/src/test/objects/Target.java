@@ -6,6 +6,7 @@ public class Target {
 	private String targetName;
 	private String targetSurname;
 	private List<SubTarget> subTargets;
+	private ListTargetContainer targetListContainer;
 
 	public String getTargetName() {
 		return targetName;
@@ -30,10 +31,13 @@ public class Target {
 	public void setSubTargets(List<SubTarget> subTargets) {
 		this.subTargets = subTargets;
 	}
-	
-	public static void main(String[] args) {
-		Target test = new Target();
-		
+
+	public ListTargetContainer getTargetListContainer() {
+		return targetListContainer;
+	}
+
+	public void setTargetListContainer(ListTargetContainer targetListContainer) {
+		this.targetListContainer = targetListContainer;
 	}
 
 }

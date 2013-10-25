@@ -1,14 +1,10 @@
-;; Anything you type in here will be executed
-;; immediately with the results shown on the
-;; right.
-(use (quote clojure.core))
-(def ^:private sourcePropertyMap {"sourceName"           "targetName"
-                                  "sourceSurname"        "targetSurname"})
-(def ^:private subSourceWithIdMap {"subSources.subName"   "subTargets.subTargetName"})
-(def ^:private m-full (merge sourcePropertyMap subSourceWithIdMap))
-(def ^:private m-to-s {"s1.n" "t1.tN" "s1.sn" "t1.tsN" "s2.n" "t2.tN"})
+(ns ch.exmachina.beans.swapper.sub-obj-map-split)
 
-m-to-s
+;(def ^:private sourcePropertyMap {"sourceName"           "targetName"
+;                                  "sourceSurname"        "targetSurname"})
+;(def ^:private subSourceWithIdMap {"subSources.subName"   "subTargets.subTargetName"})
+;(def ^:private m-full (merge sourcePropertyMap subSourceWithIdMap))
+;(def ^:private m-to-s {"s1.n" "t1.tN" "s1.sn" "t1.tsN" "s2.n" "t2.tN"})
 
 (defn str-before
   [c s]
@@ -42,7 +38,7 @@ m-to-s
   [m k]
   (into {} (filter (partial key-start-with k) m)))
 
-(defn partition-map-with-f
+(defn partition-sub-objs-map
   [m]
   (let [s-o-ids (sub-objs-s-ids-in m)
         t-o-ids (sub-objs-t-ids-in m)
@@ -52,9 +48,8 @@ m-to-s
         properties-without-ids (map #(apply hash-map (map str-after-p (flatten (vec %)))) sub-objs-properties-map)]
     (reduce merge {} (map #(hash-map %1 %2) m-key-for-sub-obj properties-without-ids))))
 
-(partition-map-with-f m-to-s)
 
-(into {} (filter #(= (.indexOf (first %) "s1") 0) {"t2" "T2" "d4.n" "d5.n" "s1.n" "s3.n" "s1.f" "s2.n" "d4.f" "d5.f"}))
-(sort-by-sub-obj-ids  {"s1.s" "s3.l" "d4.n" "d5.n" "s1.n" "s3.n" "d4.f" "d5.f"})
-
-(apply hash-map (map str-after-p (flatten (vec {"s1.n" "s2.t"}))))
+;(partition-sub-objs-map m-to-s)
+;(into {} (filter #(= (.indexOf (first %) "s1") 0) {"t2" "T2" "d4.n" "d5.n" "s1.n" "s3.n" "s1.f" "s2.n" "d4.f" "d5.f"}))
+;(sort-by-sub-obj-ids  {"s1.s" "s3.l" "d4.n" "d5.n" "s1.n" "s3.n" "d4.f" "d5.f"})
+;(apply hash-map (map str-after-p (flatten (vec {"s1.n" "s2.t"}))))
